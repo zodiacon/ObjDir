@@ -6,13 +6,9 @@
 using namespace NT;
 using namespace std;
 
-ObjectManager::ObjectManager() : _size(1 << 16) {
-	_buffer = (POBJECT_DIRECTORY_INFORMATION)malloc(_size);
-}
-
-
-ObjectManager::~ObjectManager() {
-	free(_buffer);
+ObjectManager::ObjectManager() : _size(1 << 17) {
+	_bytes = std::make_unique<BYTE[]>(_size);
+	_buffer = reinterpret_cast<NT::POBJECT_DIRECTORY_INFORMATION>(_bytes.get());
 }
 
 vector<pair<CString, CString>> ObjectManager::GetObjects(const CString& root, NTSTATUS& status) {

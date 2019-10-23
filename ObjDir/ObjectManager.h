@@ -5,7 +5,6 @@
 class ObjectManager {
 public:
 	ObjectManager();
-	~ObjectManager();
 
 	std::vector<std::pair<CString, CString>> GetObjects(const CString& root, NTSTATUS&);
 	CString GetSymbolicLinkFromName(const CString& directory, const CString& name) const;
@@ -14,6 +13,7 @@ public:
 
 private:
 	unsigned _size;
+	std::unique_ptr<BYTE[]> _bytes;
 	NT::POBJECT_DIRECTORY_INFORMATION _buffer;
 };
 
