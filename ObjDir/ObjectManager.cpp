@@ -30,12 +30,15 @@ vector<pair<CString, CString>> ObjectManager::GetObjects(const CString& root, NT
 		if(status < 0)
 			break;
 		for(ULONG i = 0; i < index - start; i++)
-			list.push_back(make_pair(_buffer[i].Name.Buffer, _buffer[i].TypeName.Buffer));
+			list.emplace_back(make_pair(
+				CString(_buffer[i].Name.Buffer, _buffer[i].Name.Length / sizeof(WCHAR)), 
+				CString(_buffer[i].TypeName.Buffer, _buffer[i].TypeName.Length / sizeof(WCHAR))));
 		if(status == 0)
 			break;
 		// more entries (STATUS_NEED_MORE_ENTRIES)
 		start = index;
-		firstEntry = FALSE;
+		if(firstEntry)
+			firstEntry = FALSE;
 	} while(true);
 	CloseHandle(hDirectory);
 	return list;
@@ -53,15 +56,15 @@ CString ObjectManager::GetSymbolicLinkFromName(const CString& directory, const C
 	RtlInitUnicodeString(&str, name);
 	InitializeObjectAttributes(&attr, &str, 0, hRoot, nullptr);
 	NtOpenSymbolicLinkObject(&hLink, GENERIC_READ, &attr);
-	WCHAR buffer[256] = { 0 };
+	WCHAR buffer[512] = { 0 };
 	UNICODE_STRING target;
 	RtlInitUnicodeString(&target, buffer);
-	target.MaximumLength = 255 * 2;
+	target.MaximumLength = sizeof(buffer);
 	ULONG len;
 	NtQuerySymbolicLinkObject(hLink, &target, &len);
 	CloseHandle(hLink);
 	CloseHandle(hRoot);
-	return target.Buffer;
+	return CString(target.Buffer, target.Length / sizeof(WCHAR));
 }
 
 HANDLE ObjectManager::OpenObject(const CString& name, ULONG access, const CString& type, NTSTATUS* pStatus) {
