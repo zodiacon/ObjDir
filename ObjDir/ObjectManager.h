@@ -12,8 +12,8 @@ public:
 	HANDLE OpenObject(const CString& name, ULONG access, const CString& type, NT::NTSTATUS* pStatus = nullptr);
 
 private:
-	unsigned _size;
-	std::unique_ptr<BYTE[]> _bytes;
-	NT::POBJECT_DIRECTORY_INFORMATION _buffer;
+	unsigned m_Size;
+	std::unique_ptr<BYTE[]> m_Bytes;
+	NT::POBJECT_DIRECTORY_INFORMATION m_Buffer;
 };
 

@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "ObjectManager.h"
 
 #pragma comment(lib, "ntdll.lib")
@@ -6,9 +6,9 @@
 using namespace NT;
 using namespace std;
 
-ObjectManager::ObjectManager() : _size(1 << 17) {
-	_bytes = std::make_unique<BYTE[]>(_size);
-	_buffer = reinterpret_cast<NT::POBJECT_DIRECTORY_INFORMATION>(_bytes.get());
+ObjectManager::ObjectManager() : m_Size(1 << 17) {
+	m_Bytes = std::make_unique<BYTE[]>(m_Size);
+	m_Buffer = reinterpret_cast<NT::POBJECT_DIRECTORY_INFORMATION>(m_Bytes.get());
 }
 
 vector<pair<CString, CString>> ObjectManager::GetObjects(const CString& root, NTSTATUS& status) {
@@ -26,13 +26,13 @@ vector<pair<CString, CString>> ObjectManager::GetObjects(const CString& root, NT
 	BOOLEAN firstEntry = TRUE;
 	int start = 0;
 	do {
-		status = NtQueryDirectoryObject(hDirectory, _buffer, _size, FALSE, firstEntry, &index, &bytes);
+		status = NtQueryDirectoryObject(hDirectory, m_Buffer, m_Size, FALSE, firstEntry, &index, &bytes);
 		if(status < 0)
 			break;
 		for(ULONG i = 0; i < index - start; i++)
 			list.emplace_back(make_pair(
-				CString(_buffer[i].Name.Buffer, _buffer[i].Name.Length / sizeof(WCHAR)), 
-				CString(_buffer[i].TypeName.Buffer, _buffer[i].TypeName.Length / sizeof(WCHAR))));
+				CString(m_Buffer[i].Name.Buffer, m_Buffer[i].Name.Length / sizeof(WCHAR)), 
+				CString(m_Buffer[i].TypeName.Buffer, m_Buffer[i].TypeName.Length / sizeof(WCHAR))));
 		if(status == 0)
 			break;
 		// more entries (STATUS_NEED_MORE_ENTRIES)
